@@ -11,5 +11,5 @@
     "verbatimModuleSyntax": true,
     "lib": ["ES2023"]
   },
-  "include": ["src", "test", "bin"]
+  "include": ["src", "test", "bin", "plugin"]
 }

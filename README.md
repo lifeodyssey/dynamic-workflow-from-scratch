@@ -73,6 +73,20 @@ ANTHROPIC_BASE_URL=https://api.anthropic.com   # or any Anthropic-compatible end
 DWF_MODEL=claude-sonnet-4-6                     # any model your endpoint serves
 ```
 
+## Use it inside OpenCode (capstone)
+
+The engine also ships as an **OpenCode plugin** (`plugin/index.ts`). It registers a
+`dwf_run_workflow` tool whose leaf `agent()` calls run as **OpenCode sub-sessions** — so the
+leaves get OpenCode's real coding tools, while the orchestration (sandbox, journal, resume,
+budget) stays this engine. This is also the proof that the engine is backend-agnostic: swapping
+the Anthropic leaf for an OpenCode leaf is one `Executor` (`src/executor/opencode.ts`, ~60 lines).
+
+Wire `plugin/index.ts` into your OpenCode `plugin` config, then ask OpenCode:
+
+> run examples/review-changes.workflow.js with dwf_run_workflow
+
+(OpenCode does not surface token counts, so budget accounting is approximate on this backend.)
+
 ## Layout
 
 ```
