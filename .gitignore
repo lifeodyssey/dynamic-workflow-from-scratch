@@ -1,0 +1,6 @@
+node_modules/
+.dwf-runs/
+dist/
+*.log
+.env
+.DS_Store
