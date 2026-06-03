@@ -59,7 +59,7 @@ export interface RunContext {
   executor: Executor
   journal: import('./journal.js').Journal
   scheduler: import('./scheduler.js').Limiter
-  budget: Budget
+  budget: import('./budget.js').RunBudget
   args: unknown
   runId: string
   state: RunState

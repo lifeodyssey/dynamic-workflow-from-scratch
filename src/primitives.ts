@@ -1,6 +1,7 @@
 import type { RunContext, AgentOpts, AgentResult } from './types.js'
 import { MAX_TOTAL_AGENTS } from './types.js'
 import { chainKey } from './journal.js'
+import { DEFAULT_RESERVE as RESERVE } from './budget.js'
 
 /**
  * Build the workflow DSL globals, each closing over the per-run context.
@@ -26,15 +27,22 @@ export function makeGlobals(ctx: RunContext) {
     ctx.emit({ ev: 'agent', cached: false, agentId, phase: ctx.state.currentPhase })
 
     return ctx.scheduler.run(async () => {
-      if (ctx.budget.total !== null && ctx.budget.remaining() <= 0) throw new Error('Workflow token budget exceeded')
       if (ctx.state.agentCount >= MAX_TOTAL_AGENTS) throw new Error('WorkflowAgentCapError: exceeded 1000 agents')
+      // Reserve-at-slot: account for this in-flight agent so concurrent calls can't all overshoot the ceiling.
+      if (!ctx.budget.reserve(RESERVE)) throw new Error('Workflow token budget exceeded')
       ctx.journal.recordStarted(key, agentId)
-      const resp = await ctx.executor.run({ prompt, opts, agentId }, ctx.signal)
-      ctx.state.agentCount++
-      ctx.state.tokensSpent += resp.usage.outputTokens
-      ctx.journal.recordResult(key, agentId, resp)
-      ctx.emit({ ev: 'agent', cached: false, agentId, phase: ctx.state.currentPhase, outputTokens: resp.usage.outputTokens, done: true })
-      return unwrap(resp, opts)
+      try {
+        const resp = await ctx.executor.run({ prompt, opts, agentId }, ctx.signal)
+        ctx.budget.settle(RESERVE, resp.usage.outputTokens) // swap the estimate for the real cost
+        ctx.state.agentCount++
+        ctx.state.tokensSpent += resp.usage.outputTokens
+        ctx.journal.recordResult(key, agentId, resp)
+        ctx.emit({ ev: 'agent', cached: false, agentId, phase: ctx.state.currentPhase, outputTokens: resp.usage.outputTokens, done: true })
+        return unwrap(resp, opts)
+      } catch (e) {
+        ctx.budget.release(RESERVE) // failed call spends nothing
+        throw e
+      }
     })
   }
 
