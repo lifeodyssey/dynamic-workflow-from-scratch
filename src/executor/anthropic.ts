@@ -10,6 +10,7 @@ interface MessagesClient {
 export interface AnthropicBackendOpts {
   client?: MessagesClient // inject a fake for offline tests
   apiKey?: string
+  baseURL?: string // custom Anthropic-compatible endpoint (e.g. a token-plan proxy)
   model?: string
   maxTokens?: number
   system?: string
@@ -24,8 +25,13 @@ export class AnthropicBackend implements Executor {
   private system?: string
 
   constructor(opts: AnthropicBackendOpts = {}) {
+    const baseURL = opts.baseURL ?? process.env.ANTHROPIC_BASE_URL
     this.client =
-      opts.client ?? (new Anthropic({ apiKey: opts.apiKey ?? process.env.ANTHROPIC_API_KEY }) as unknown as MessagesClient)
+      opts.client ??
+      (new Anthropic({
+        apiKey: opts.apiKey ?? process.env.ANTHROPIC_API_KEY,
+        ...(baseURL ? { baseURL } : {}),
+      }) as unknown as MessagesClient)
     this.model = opts.model ?? process.env.DWF_MODEL ?? 'claude-sonnet-4-6'
     this.maxTokens = opts.maxTokens ?? 4096
     this.system = opts.system

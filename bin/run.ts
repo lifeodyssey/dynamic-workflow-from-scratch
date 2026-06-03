@@ -1,8 +1,21 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { runWorkflow } from '../src/runner.js'
 import { MockBackend } from '../src/executor/mock.js'
 import { AnthropicBackend } from '../src/executor/anthropic.js'
 import type { Executor } from '../src/types.js'
+
+// Tiny dependency-free .env loader (gitignored). Missing file is fine; existing env wins.
+function loadDotenv(path = '.env'): void {
+  if (!existsSync(path)) return
+  for (const line of readFileSync(path, 'utf8').split('\n')) {
+    const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*$/)
+    if (!m || line.trimStart().startsWith('#')) continue
+    let val = m[2]
+    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) val = val.slice(1, -1)
+    if (process.env[m[1]] === undefined) process.env[m[1]] = val
+  }
+}
+loadDotenv()
 
 const argv = process.argv.slice(2)
 const file = argv.find((a) => !a.startsWith('--'))
