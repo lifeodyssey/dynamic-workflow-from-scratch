@@ -1,6 +1,6 @@
 {
   "name": "dynamic-workflow-from-scratch",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A from-scratch, runnable reimplementation of Claude Code dynamic workflows — sandboxed JS orchestration with prefix-chained journaled resume.",
   "type": "module",
   "license": "MIT",
