@@ -33,6 +33,10 @@ export class MockBackend implements Executor {
 
   constructor(private opt: { responder?: (r: AgentRequest) => AgentResult } = {}) {}
 
+  fingerprint(): string {
+    return 'mock'
+  }
+
   async run(req: AgentRequest, _signal?: AbortSignal): Promise<AgentResult> {
     this.calls.push(req)
     if (this.opt.responder) return this.opt.responder(req)

@@ -37,6 +37,10 @@ export class AnthropicBackend implements Executor {
     this.system = opts.system
   }
 
+  fingerprint(): string {
+    return 'anthropic:' + this.model
+  }
+
   async run(req: AgentRequest, _signal?: AbortSignal): Promise<AgentResult> {
     const model = req.opts.model ?? this.model
     return req.opts.schema ? this.runStructured(req, model, req.opts.schema) : this.runText(req, model)

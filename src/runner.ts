@@ -30,7 +30,15 @@ export async function runWorkflow(source: string, opts: RunOptions): Promise<Run
   const runsDir = opts.runsDir ?? join(process.cwd(), '.dwf-runs')
   const journal = openJournal(runsDir, runId, opts.resumeFromRunId)
   const events: object[] = []
-  const state: RunState = { ordinal: 0, chain: '', agentCount: 0, currentPhase: '', agentSeq: 0, tokensSpent: 0 }
+  // Seed the prefix chain with the backend fingerprint so a run never serves another backend's cache.
+  const state: RunState = {
+    ordinal: 0,
+    chain: opts.executor.fingerprint?.() ?? '',
+    agentCount: 0,
+    currentPhase: '',
+    agentSeq: 0,
+    tokensSpent: 0,
+  }
 
   const ctx: RunContext = {
     executor: opts.executor,

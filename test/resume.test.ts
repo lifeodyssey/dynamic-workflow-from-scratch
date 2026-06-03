@@ -44,6 +44,25 @@ test('an identical re-run is a full 0-call cache hit', async () => {
   expect(r2.result).toBe(3) // ...but the result is still correct (served from journal)
 })
 
+test('a different backend (fingerprint) does NOT reuse another backend\'s cached results', async () => {
+  const runsDir = tmp()
+  const m1 = new MockBackend()
+  const r1 = await runWorkflow(V1, { executor: m1, runsDir })
+  expect(m1.calls.length).toBe(3)
+
+  // a "real-ish" executor with a different fingerprint, resuming the same runId
+  let realCalls = 0
+  const realish = {
+    fingerprint: () => 'anthropic:some-model',
+    async run(req: any) {
+      realCalls++
+      return { text: 'R:' + req.prompt, usage: { inputTokens: 0, outputTokens: 1 } }
+    },
+  }
+  await runWorkflow(V1, { executor: realish as any, runsDir, resumeFromRunId: r1.runId })
+  expect(realCalls).toBe(3) // all re-run — no cross-backend cache hits
+})
+
 test('editing the FIRST call re-runs everything', async () => {
   const runsDir = tmp()
   const m1 = new MockBackend()

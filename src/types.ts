@@ -21,6 +21,11 @@ export interface AgentResult {
 
 export interface Executor {
   run(req: AgentRequest, signal: AbortSignal): Promise<AgentResult>
+  /**
+   * Identity of the backend + model that produces outputs. Mixed into the prefix-chain seed so
+   * a run on one backend never serves cached results from another (e.g. mock results to a real run).
+   */
+  fingerprint?(): string
 }
 
 // On-disk journal line (matches the real engine's 2-event stream; implementation-reference §1.1)
