@@ -4,8 +4,12 @@
   "description": "A from-scratch, runnable reimplementation of Claude Code dynamic workflows — sandboxed JS orchestration with prefix-chained journaled resume.",
   "type": "module",
   "license": "MIT",
-  "engines": { "node": ">=20" },
-  "bin": { "dwf": "bin/run.ts" },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "dwf": "bin/run.ts"
+  },
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
@@ -15,6 +19,7 @@
     "demo": "tsx bin/run.ts examples/deep-research.workflow.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "ajv": "^8.17.1"
   },
   "devDependencies": {
