@@ -2,7 +2,7 @@ import os from 'node:os'
 import { join } from 'node:path'
 import { loadWorkflow } from './loader.js'
 import { runInSandbox } from './sandbox.js'
-import { Journal } from './journal.js'
+import { openJournal } from './resume.js'
 import { Limiter, defaultConcurrency } from './scheduler.js'
 import { makeBudget } from './budget.js'
 import { makeGlobals } from './primitives.js'
@@ -28,7 +28,7 @@ export interface RunResult {
 export async function runWorkflow(source: string, opts: RunOptions): Promise<RunResult> {
   const { meta, runId, body } = loadWorkflow(source, 'workflow.js', opts.args)
   const runsDir = opts.runsDir ?? join(process.cwd(), '.dwf-runs')
-  const journal = new Journal(join(runsDir, runId, 'journal.jsonl'))
+  const journal = openJournal(runsDir, runId, opts.resumeFromRunId)
   const events: object[] = []
   const state: RunState = { ordinal: 0, chain: '', agentCount: 0, currentPhase: '', agentSeq: 0, tokensSpent: 0 }
 

@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "demo:mock": "tsx bin/run.ts examples/deep-research.workflow.js --mock",
+    "demo:resume": "tsx scripts/resume-demo.ts",
     "demo": "tsx bin/run.ts examples/deep-research.workflow.js"
   },
   "dependencies": {
